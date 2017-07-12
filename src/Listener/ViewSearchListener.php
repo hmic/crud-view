@@ -39,8 +39,32 @@ class ViewSearchListener extends BaseListener
     public function implementedEvents()
     {
         return [
+            'Crud.beforePaginate' => ['callable' => 'beforePaginate'],
             'Crud.afterPaginate' => ['callable' => 'afterPaginate']
         ];
+    }
+
+    /**
+     * Before paginate event callback.
+     *
+     * Applies the "search" finder to query.
+     *
+     * @param \Cake\Event\Event $event Event.
+     * @return void
+     */
+    public function beforePaginate(Event $event)
+    {
+        if (!$this->_table()->behaviors()->has('Search')) {
+            return;
+        }
+
+        $event->subject()->query->find(
+            'search',
+            [
+                'search' => $this->_controller()->request->getQueryParams(),
+                'collection' => $this->getConfig('collection')
+            ]
+        );
     }
 
     /**
